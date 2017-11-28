@@ -22,3 +22,64 @@ limitations under the License.
 // fetch event listener
 
 // TODO SW-5 - delete outdated caches in the activate event listener
+
+var cachedFiles = [
+    '/',
+    'index.html',
+    'scripts/main.min.js',
+    'styles/main.css',
+    'images/products/BarrelChair.jpg',
+    'images/products/C10.jpg',
+    'images/products/Cl2.jpg',
+    'images/products/CP03_blue.jpg',
+    'images/products/CPC_RECYCLED.jpg',
+    'images/products/CPFS.jpg',
+    'images/products/CPO2_red.jpg',
+    'images/products/CPT.jpg',
+    'images/products/CS1.jpg',
+    'images/touch/apple-touch-icon.png',
+    'images/touch/chrome-touch-icon-192x192.png',
+    'images/touch/icon-128x128.png',
+    'images/touch/ms-touch-icon-144x144-precomposed.png',
+    'images/about-hero-image.jpg',
+    'images/delete.svg',
+    'images/footer-background.png',
+    'images/hamburger.svg',
+    'images/header-bg.jpg',
+    'images/logo.png'
+]
+
+self.addEventListener('install', function (event) {
+    event.waitUntil(
+        caches.open('cache-v1').then(function (cache) {
+            return cache.addAll(cachedFiles);
+        })
+    );
+});
+
+// step 4 cache first
+self.addEventListener('fetch', function (event) {
+    event.respondWith(
+        caches.match(event.request).then(function (response) {
+            return response || fetch(event.request);
+        })
+    );
+});
+
+
+// cleanup and delete (step 5)
+self.addEventListener('activate', function (event) {
+    event.waitUntil(
+        caches.keys().then(function (cacheNames) {
+            return Promise.all(
+                cacheNames.filter(function (cacheName) {
+                    // Return true if you want to remove this cache,
+                    // but remember that caches are shared across
+                    // the whole origin
+                }).map(function (cacheName) {
+                    return caches.delete(cacheName);
+                })
+            );
+        })
+    );
+});
